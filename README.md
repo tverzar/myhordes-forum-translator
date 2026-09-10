@@ -1,4 +1,6 @@
 # MyHordes Forum Translator (Tampermonkey userscript)
+<img width="377" height="707" alt="firefox_VDE9xijYku" src="https://github.com/user-attachments/assets/bc65ad4c-3a94-400e-9502-e10b03c1caa0" />
+
 
 Translates forum posts on MyHordes (myhordes.eu, myhordes.de, myhordes.fr,
 myhordes.com — same app, different community domains) between French,
