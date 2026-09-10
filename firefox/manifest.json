@@ -1,0 +1,38 @@
+{
+  "manifest_version": 2,
+  "name": "MyHordes Forum Translator",
+  "version": "1.0.0",
+  "description": "Translates MyHordes forum posts between French, English, Russian and Spanish (Google Translate, MyMemory, DeepL or Yandex).",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "myhordes-forum-translator@rammthaok",
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": ["websiteContent", "personalCommunications"]
+      }
+    }
+  },
+  "permissions": [
+    "storage",
+    "https://translate.googleapis.com/*",
+    "https://api-free.deepl.com/*",
+    "https://api.deepl.com/*",
+    "https://api.mymemory.translated.net/*",
+    "https://translate.api.cloud.yandex.net/*"
+  ],
+  "background": {
+    "scripts": ["background/providers.js", "background/background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://myhordes.eu/*", "*://*.myhordes.eu/*"],
+      "js": ["content/content.js"],
+      "css": ["content/content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": false
+  }
+}

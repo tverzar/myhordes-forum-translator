@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <h1>MyHordes Forum Translator</h1>
+
+  <fieldset>
+    <legend>Reading translations</legend>
+    <label>
+      Translate forum posts into:
+      <select id="targetLang">
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="ru">Русский</option>
+        <option value="es">Español</option>
+      </select>
+    </label>
+    <p class="hint">Default language pre-selected next to the "Translate" button under each post. You can still override it per-post.</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Translation provider</legend>
+
+    <label>
+      <input type="radio" name="provider" value="google" id="provider-google">
+      Google Translate — free, no signup or key required.
+    </label>
+
+    <label>
+      <input type="radio" name="provider" value="mymemory" id="provider-mymemory">
+      MyMemory — free, no key, ~5000 words/day (lower quality).
+    </label>
+
+    <label>
+      <input type="radio" name="provider" value="deepl" id="provider-deepl">
+      DeepL — best quality, needs your own API key.
+    </label>
+    <div id="deepl-settings" class="indent">
+      <label>
+        DeepL API key:
+        <input type="password" id="deeplApiKey" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx[:fx]" autocomplete="off">
+      </label>
+      <p class="hint">
+        Get a key at
+        <a href="https://www.deepl.com/pro-api" target="_blank" rel="noopener noreferrer">deepl.com/pro-api</a>.
+        Free-plan keys end in <code>:fx</code> and are detected automatically.
+        Note: DeepL requires a credit/debit card at signup even for the free plan
+        (you won't be charged while staying under the free quota).
+      </p>
+    </div>
+
+    <label>
+      <input type="radio" name="provider" value="yandex" id="provider-yandex">
+      Yandex Translate — very good for Russian, needs a Yandex Cloud API key + folder ID.
+    </label>
+    <div id="yandex-settings" class="indent">
+      <label>
+        Yandex API key:
+        <input type="password" id="yandexApiKey" placeholder="AQVN..." autocomplete="off">
+      </label>
+      <label>
+        Yandex Folder ID:
+        <input type="text" id="yandexFolderId" placeholder="b1g..." autocomplete="off">
+      </label>
+      <p class="hint">
+        Create both in the <a href="https://console.cloud.yandex.com/" target="_blank" rel="noopener noreferrer">Yandex Cloud console</a>
+        (Translate service, service account with an API key). Also requires linking a card to the Cloud account.
+      </p>
+    </div>
+  </fieldset>
+
+  <button id="save">Save</button>
+  <span id="status"></span>
+
+  <script src="options.js"></script>
+</body>
+</html>

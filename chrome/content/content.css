@@ -1,0 +1,74 @@
+.mh-translate-controls {
+  white-space: nowrap;
+}
+
+.mh-translate-controls select.mh-translate-lang {
+  font-size: 11px;
+  padding: 0;
+  margin: 0 2px 0 0;
+  vertical-align: middle;
+}
+
+.mh-translate-controls a.mh-translate-btn {
+  cursor: pointer;
+}
+
+.mh-translation-block {
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-left: 3px solid #6a8759;
+  background: rgba(106, 135, 89, 0.1);
+  font-size: 0.95em;
+}
+
+.mh-translation-header {
+  font-size: 0.8em;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.mh-compose-translate {
+  margin-bottom: 6px;
+  font-size: 0.95em;
+}
+
+.mh-compose-toggle {
+  background: none;
+  border: 1px solid #6a8759;
+  border-radius: 3px;
+  color: inherit;
+  cursor: pointer;
+  padding: 2px 8px;
+  font-size: 0.9em;
+}
+
+.mh-compose-body {
+  margin-top: 4px;
+  padding: 6px 8px;
+  border-left: 3px solid #6a8759;
+  background: rgba(106, 135, 89, 0.1);
+}
+
+.mh-compose-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  font: inherit;
+}
+
+.mh-compose-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.mh-compose-insert {
+  cursor: pointer;
+}
+
+.mh-compose-status {
+  font-size: 0.85em;
+  opacity: 0.8;
+}
