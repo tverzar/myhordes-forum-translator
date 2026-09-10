@@ -39,5 +39,9 @@
   "options_ui": {
     "page": "options/options.html",
     "open_in_tab": false
+  },
+  "browser_action": {
+    "default_title": "MyHordes Forum Translator",
+    "default_popup": "options/options.html"
   }
 }
