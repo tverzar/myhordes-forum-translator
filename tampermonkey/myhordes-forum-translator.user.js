@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         MyHordes Forum Translator
 // @namespace    https://myhordes.eu/
-// @version      1.0.1
+// @version      1.0.2
 // @description  Translate MyHordes forum posts between French, English, Russian and Spanish (Google Translate, MyMemory, DeepL or Yandex), and translate your own replies into the forum's language.
 // @author       you
 // @updateURL    https://raw.githubusercontent.com/tverzar/myhordes-forum-translator/master/tampermonkey/myhordes-forum-translator.user.js
 // @downloadURL  https://raw.githubusercontent.com/tverzar/myhordes-forum-translator/master/tampermonkey/myhordes-forum-translator.user.js
+// @icon         data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDY0IDY0Ij4KICA8Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIzMCIgZmlsbD0iIzZhODc1OSIvPgogIDx0ZXh0IHg9IjMyIiB5PSI0NCIgZm9udC1zaXplPSIzNCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+MkDwvdGV4dD4KPC9zdmc+Cg==
 // @match        https://myhordes.eu/*
 // @match        https://*.myhordes.eu/*
 // @match        https://myhordes.de/*
@@ -214,7 +215,7 @@
 
   const style = document.createElement("style");
   style.textContent = `
-    .mh-translate-controls { white-space: nowrap; }
+    .mh-translate-controls { display: block; clear: both; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 4px; }
     .mh-translate-controls select.mh-translate-lang { font-size: 11px; padding: 0; margin: 0 2px 0 0; vertical-align: middle; }
     .mh-translate-controls a.mh-translate-btn { cursor: pointer; }
 
@@ -480,20 +481,12 @@
     return { wrap, select, link };
   }
 
-  function findAnchor(postEl) {
-    const footerRight = postEl.querySelector(".forum-post-footer .float-right");
-    if (footerRight) return { parent: footerRight, before: footerRight.firstChild };
-    const footer = postEl.querySelector(".forum-post-footer");
-    if (footer) return { parent: footer, before: footer.firstChild };
-    return null;
-  }
-
   function insertControls(postEl) {
     if (postEl.hasAttribute(PROCESSED_ATTR)) return;
 
     const contentEl = postEl.querySelector(".forum-post-content");
-    const anchor = findAnchor(postEl);
-    if (!contentEl || !anchor) return;
+    const footer = postEl.querySelector(".forum-post-footer");
+    if (!contentEl || !footer) return;
 
     postEl.setAttribute(PROCESSED_ATTR, "1");
 
@@ -503,7 +496,7 @@
       onTranslateClick(contentEl, select.value, link);
     });
 
-    anchor.parent.insertBefore(wrap, anchor.before);
+    footer.insertAdjacentElement("afterend", wrap);
   }
 
   function findTranslationBlock(contentEl) {
