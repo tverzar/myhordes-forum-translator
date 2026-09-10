@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MyHordes Forum Translator
 // @namespace    https://myhordes.eu/
-// @version      1.0.0
+// @version      1.0.1
 // @description  Translate MyHordes forum posts between French, English, Russian and Spanish (Google Translate, MyMemory, DeepL or Yandex), and translate your own replies into the forum's language.
 // @author       you
 // @match        https://myhordes.eu/*
@@ -239,6 +239,9 @@
       position: fixed; inset: 0; z-index: 100001;
       background: rgba(0,0,0,0.45);
       display: flex; align-items: center; justify-content: center;
+    }
+    #mh-translate-settings-overlay[hidden] {
+      display: none;
     }
     #mh-translate-settings-panel {
       background: #fdfaf3; color: #2a2a2a; width: 380px; max-width: calc(100vw - 32px);
