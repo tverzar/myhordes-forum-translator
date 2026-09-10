@@ -2,8 +2,9 @@
 
 Translates forum posts on MyHordes (myhordes.eu, myhordes.de, myhordes.fr,
 myhordes.com — same app, different community domains) between French,
-English, Russian and Spanish (any direction), and helps you write a reply in
-your own language and translate it into the forum's language before posting.
+English, Russian and Spanish (any direction), and lets you write a reply in
+your own language and have it replaced with the translated version before
+posting.
 
 One file, no build step, no browser store, no signing — install it in
 [Tampermonkey](https://www.tampermonkey.net/) (Chrome, Firefox, Edge, etc.)
@@ -11,19 +12,22 @@ and it just works, permanently, immediately.
 
 ## Features
 
-- Adds a `[ EN ▾ Translate ]`-style control to every forum post's action bar.
-  Pick a target language and click Translate — the translation appears in a
-  highlighted block right under the post. Click again to hide it.
+- Adds a small **🌐 Translate** button under every forum post. One click
+  translates it into your configured reading language and shows the
+  translation in a highlighted block right under the post. Click again to
+  hide it. No per-post language picker — the language is fixed once in the
+  settings panel.
 - Auto-detects the source language (any of FR/EN/RU/ES, or anything else the
   translation service supports).
 - Works with the forum's AJAX pagination and dynamically loaded threads (uses
   a `MutationObserver`, not a one-time page scan).
-- When you open the post editor (new post/reply), a "✎ Write in my language &
-  translate" panel appears above it. Type your message, pick the target
-  language, click **Translate & insert** — the translated text is inserted
-  into the editor (appended, so it won't erase an existing quote).
-- A floating ⚙ button (bottom-right corner of the page) opens the settings
-  panel: reading language, translation provider, API keys.
+- When you open the post editor (new post/reply), a **🌐 Translate my
+  message** button appears above it. Type your reply in your own language,
+  click it — the editor's content is replaced in place with the translation
+  into your configured writing language.
+- A floating **🌐** button (bottom-right corner of the page) opens the
+  settings panel: reading language, writing/reply language, translation
+  provider, API keys.
 - Four translation providers:
   - **Google Translate** (free, no signup, default).
   - **MyMemory** (free, no key, ~5000 words/day).
@@ -42,16 +46,23 @@ and it just works, permanently, immediately.
 3. Save (Ctrl+S). That's it — no restart needed, it's live immediately on
    any myhordes.eu/.de/.fr/.com page.
 
-To update later, just replace the script's contents with the new version the
-same way.
+### Updating
+
+The script ships with `@updateURL`/`@downloadURL` pointing at this repo, so
+Tampermonkey checks for new versions on its own (periodically, per its
+Settings → Update interval). To force an immediate check instead of waiting:
+Tampermonkey Dashboard → **Utilities** tab → **Update all scripts to their
+latest version** (or open the script and use its own "check for updates").
 
 ## Configure
 
-Click the **⚙** button that appears fixed at the bottom-right corner of any
-MyHordes page:
+Click the **🌐** button fixed at the bottom-right corner of any MyHordes
+page:
 
-- **Translate forum posts into**: your reading language, used as the default
-  in the per-post language dropdown.
+- **Translate forum posts into**: your reading language — used by the
+  per-post 🌐 Translate button.
+- **Translate my replies into**: your writing language — used by the 🌐
+  Translate my message button above the reply editor.
 - **Translation provider**: Google Translate (default), MyMemory, DeepL, or Yandex Translate.
   - For DeepL, paste your API key. Free-tier keys end in `:fx` and are
     detected automatically to use the correct API endpoint
@@ -65,10 +76,8 @@ MyHordes page:
     translation quality and a daily quota (~5000 words, shared across all
     anonymous users of that IP).
 
-The "Translate to" language used by the compose panel is remembered
-separately (defaults to French) and can be changed directly from the
-dropdown next to the panel. All settings are stored via Tampermonkey's
-`GM_setValue`/`GM_getValue` (local to your browser, per-script).
+All settings are stored via Tampermonkey's `GM_setValue`/`GM_getValue`
+(local to your browser, per-script).
 
 ## Translation quality (rough ranking)
 
@@ -90,14 +99,15 @@ selectors in `tampermonkey/myhordes-forum-translator.user.js`.
 
 - The Google Translate endpoint used here (`translate.googleapis.com`) is the
   free, unofficial one used by the "gtx" client — it can occasionally
-  rate-limit or change without notice. Switch providers in the ⚙ settings if
+  rate-limit or change without notice. Switch providers in the 🌐 settings if
   that happens.
 - Translations of forum posts are shown as plain text underneath the post;
   the original post (images, spoilers, polls, BBCode formatting) is left
   untouched.
-- Inserting into the editor replaces the editor's whole HTML with
-  `existing content + translated text`, since that's the only API the forum's
-  `<hordes-twino-editor>` component exposes for programmatic edits.
+- The "Translate my message" button **replaces** the reply editor's whole
+  content with the translation — it doesn't merge with what was there
+  before, since that's the only API the forum's `<hordes-twino-editor>`
+  component exposes for programmatic edits.
 - Cross-origin requests to the translation APIs go through
   `GM_xmlhttpRequest`, which Tampermonkey exempts from the page's CORS
   restrictions — no background script or manifest permissions needed.
