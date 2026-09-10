@@ -1,11 +1,13 @@
-# MyHordes Forum Translator (Firefox + Chrome)
+# MyHordes Forum Translator (Tampermonkey userscript)
 
-Translates forum posts on MyHordes (myhordes.eu, myhordes.de, myhordes.fr, myhordes.com — same app, different community domains) between French, English,
-Russian and Spanish (any direction), and helps you write a reply in your own
-language and translate it into the forum's language before posting.
+Translates forum posts on MyHordes (myhordes.eu, myhordes.de, myhordes.fr,
+myhordes.com — same app, different community domains) between French,
+English, Russian and Spanish (any direction), and helps you write a reply in
+your own language and translate it into the forum's language before posting.
 
-Ships as two packages built from one shared source: `firefox/` (Manifest V2)
-and `chrome/` (Manifest V3).
+One file, no build step, no browser store, no signing — install it in
+[Tampermonkey](https://www.tampermonkey.net/) (Chrome, Firefox, Edge, etc.)
+and it just works, permanently, immediately.
 
 ## Features
 
@@ -20,62 +22,33 @@ and `chrome/` (Manifest V3).
   translate" panel appears above it. Type your message, pick the target
   language, click **Translate & insert** — the translated text is inserted
   into the editor (appended, so it won't erase an existing quote).
-- Four translation providers, chosen in the addon's options:
+- A floating ⚙ button (bottom-right corner of the page) opens the settings
+  panel: reading language, translation provider, API keys.
+- Four translation providers:
   - **Google Translate** (free, no signup, default).
   - **MyMemory** (free, no key, ~5000 words/day).
   - **DeepL** (best quality, needs your own API key — free tier requires a card at signup, no charge under quota).
   - **Yandex Translate** (very good for Russian, needs a Yandex Cloud API key + folder ID, also requires a linked card).
 
-## Project layout
-
-```
-shared/            source of truth: content script, options page, translation providers
-firefox/            Firefox package (Manifest V2, background page)
-chrome/              Chrome package (Manifest V3, service worker)
-build.js            copies shared/ into firefox/ and chrome/
-```
-
-Only `firefox/manifest.json` + `firefox/background/background.js` and
-`chrome/manifest.json` + `chrome/background/background.js` are
-browser-specific (MV2 background page vs. MV3 service worker). Everything
-else — `content/`, `options/`, `background/providers.js` — is identical in
-both packages.
-
-**After editing anything under `shared/`, run `node build.js`** to re-copy it
-into both packages before testing/reloading either browser's copy.
-
 ## Install
 
-### Firefox (temporary, for development/personal use)
+1. Install the [Tampermonkey](https://www.tampermonkey.net/) browser extension
+   (works in Chrome, Firefox, Edge, Brave, Opera...).
+2. Open Tampermonkey's dashboard → **Create a new script**, delete the
+   placeholder content, and paste in the contents of
+   [`tampermonkey/myhordes-forum-translator.user.js`](tampermonkey/myhordes-forum-translator.user.js).
+   (Or: Tampermonkey dashboard → Utilities → **Import from file** and pick
+   that file directly.)
+3. Save (Ctrl+S). That's it — no restart needed, it's live immediately on
+   any myhordes.eu/.de/.fr/.com page.
 
-1. Open Firefox and go to `about:debugging#/runtime/this-firefox`.
-2. Click **Load Temporary Add-on…**.
-3. Select `firefox/manifest.json`.
-4. The addon is now active on any myhordes.eu/.de/.fr/.com domain until you restart Firefox (you'll
-   need to reload it then).
-
-For a permanent install, package with [web-ext](https://github.com/mozilla/web-ext)
-(`npx web-ext lint --source-dir=./firefox` to validate,
-`npx web-ext build --source-dir=./firefox` to zip it) and either
-self-distribute a signed `.xpi` (`web-ext sign`, needs a free AMO API key) or
-submit it to addons.mozilla.org.
-
-### Chrome / Chromium (Edge, Brave, etc.)
-
-1. Open `chrome://extensions`.
-2. Enable **Developer mode** (top right).
-3. Click **Load unpacked** and select the `chrome/` folder.
-4. The addon is now active on any myhordes.eu/.de/.fr/.com domain.
-
-For the Chrome Web Store, zip the contents of `chrome/` and upload it via the
-[developer dashboard](https://chrome.google.com/webstore/devconsole) (a
-one-time $5 registration fee applies).
+To update later, just replace the script's contents with the new version the
+same way.
 
 ## Configure
 
-Open the options page: `about:addons` → this addon → Preferences (Firefox),
-or `chrome://extensions` → this extension → Details → Extension options
-(Chrome).
+Click the **⚙** button that appears fixed at the bottom-right corner of any
+MyHordes page:
 
 - **Translate forum posts into**: your reading language, used as the default
   in the per-post language dropdown.
@@ -94,7 +67,8 @@ or `chrome://extensions` → this extension → Details → Extension options
 
 The "Translate to" language used by the compose panel is remembered
 separately (defaults to French) and can be changed directly from the
-dropdown next to the panel.
+dropdown next to the panel. All settings are stored via Tampermonkey's
+`GM_setValue`/`GM_getValue` (local to your browser, per-script).
 
 ## Translation quality (rough ranking)
 
@@ -105,18 +79,18 @@ dropdown next to the panel.
 
 ## How it targets the forum
 
-The content script matches on `.forum-post` / `.forum-post-content` /
+The script matches on `.forum-post` / `.forum-post-content` /
 `.forum-post-footer` and the `<hordes-twino-editor>` custom element, which
 are the actual class names/element used by MyHordes' own forum templates
 (`templates/ajax/forum/posts.html.twig`, `templates/ajax/editor/base/forum-editor.html.twig`
 in the MyHordes source). If MyHordes changes its forum markup, update the
-selectors in `shared/content/content.js` and re-run `node build.js`.
+selectors in `tampermonkey/myhordes-forum-translator.user.js`.
 
 ## Notes / limitations
 
 - The Google Translate endpoint used here (`translate.googleapis.com`) is the
   free, unofficial one used by the "gtx" client — it can occasionally
-  rate-limit or change without notice. Switch providers in the options if
+  rate-limit or change without notice. Switch providers in the ⚙ settings if
   that happens.
 - Translations of forum posts are shown as plain text underneath the post;
   the original post (images, spoilers, polls, BBCode formatting) is left
@@ -124,7 +98,6 @@ selectors in `shared/content/content.js` and re-run `node build.js`.
 - Inserting into the editor replaces the editor's whole HTML with
   `existing content + translated text`, since that's the only API the forum's
   `<hordes-twino-editor>` component exposes for programmatic edits.
-- The Firefox manifest declares `data_collection_permissions` (websiteContent,
-  personalCommunications) because translating text necessarily sends it to
-  the chosen third-party translation provider — required since Firefox 140+
-  for all extensions distributed through AMO.
+- Cross-origin requests to the translation APIs go through
+  `GM_xmlhttpRequest`, which Tampermonkey exempts from the page's CORS
+  restrictions — no background script or manifest permissions needed.
