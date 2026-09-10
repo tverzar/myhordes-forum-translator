@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MyHordes Forum Translator
 // @namespace    https://myhordes.eu/
-// @version      1.1.0
+// @version      1.2.0
 // @description  Translate MyHordes forum posts between French, English, Russian and Spanish (Google Translate, MyMemory, DeepL or Yandex), and translate your own replies into the forum's language.
 // @author       you
 // @updateURL    https://raw.githubusercontent.com/tverzar/myhordes-forum-translator/master/tampermonkey/myhordes-forum-translator.user.js
@@ -229,12 +229,7 @@
     .mh-translation-block { margin-top: 6px; padding: 6px 8px; border-left: 3px solid #6a8759; background: rgba(106, 135, 89, 0.1); font-size: 0.95em; }
     .mh-translation-header { font-size: 0.8em; opacity: 0.7; margin-bottom: 4px; }
 
-    .mh-compose-translate { margin-bottom: 6px; font-size: 0.95em; }
-    .mh-compose-toggle { background: none; border: 1px solid #6a8759; border-radius: 3px; color: inherit; cursor: pointer; padding: 2px 8px; font-size: 0.9em; }
-    .mh-compose-body { margin-top: 4px; padding: 6px 8px; border-left: 3px solid #6a8759; background: rgba(106, 135, 89, 0.1); }
-    .mh-compose-textarea { width: 100%; box-sizing: border-box; resize: vertical; font: inherit; }
-    .mh-compose-controls { display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
-    .mh-compose-insert { cursor: pointer; }
+    .mh-compose-controls { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
     .mh-compose-status { font-size: 0.85em; opacity: 0.8; }
 
     #mh-translate-fab {
@@ -318,6 +313,26 @@
     readingLabel.appendChild(readingSelect);
     readingFieldset.appendChild(readingLabel);
     panel.appendChild(readingFieldset);
+
+    // Writing language
+    const writingFieldset = document.createElement("fieldset");
+    const writingLegend = document.createElement("legend");
+    writingLegend.textContent = "Writing replies";
+    writingFieldset.appendChild(writingLegend);
+
+    const writingLabel = document.createElement("label");
+    writingLabel.textContent = "Translate my replies into: ";
+    const writingSelect = buildLangSelect(getSetting("composeTargetLang"));
+    writingSelect.classList.remove("mh-translate-lang");
+    writingLabel.appendChild(writingSelect);
+    writingFieldset.appendChild(writingLabel);
+
+    const writingHint = document.createElement("p");
+    writingHint.className = "mh-hint";
+    writingHint.textContent = "Write your reply in your own language in the editor, then click the 🌐 Translate button that appears above it — it replaces what you typed with the translation into this language.";
+    writingFieldset.appendChild(writingHint);
+
+    panel.appendChild(writingFieldset);
 
     // Provider
     const providerFieldset = document.createElement("fieldset");
@@ -418,6 +433,7 @@
       const provider = Object.keys(providerRadios).find((k) => providerRadios[k].checked) || "google";
       setSetting("provider", provider);
       setSetting("targetLang", readingSelect.value);
+      setSetting("composeTargetLang", writingSelect.value);
       setSetting("deeplApiKey", document.getElementById("mh-deepl-key").value.trim());
       setSetting("yandexApiKey", document.getElementById("mh-yandex-key").value.trim());
       setSetting("yandexFolderId", document.getElementById("mh-yandex-folder").value.trim());
@@ -434,6 +450,7 @@
       const provider = providerRadios[getSetting("provider")] ? getSetting("provider") : "google";
       providerRadios[provider].checked = true;
       readingSelect.value = getSetting("targetLang");
+      writingSelect.value = getSetting("composeTargetLang");
       document.getElementById("mh-deepl-key").value = getSetting("deeplApiKey");
       document.getElementById("mh-yandex-key").value = getSetting("yandexApiKey");
       document.getElementById("mh-yandex-folder").value = getSetting("yandexFolderId");
@@ -561,86 +578,60 @@
   // Compose translator (attached above the forum's post editor)
   // ---------------------------------------------------------------------
 
+  function htmlToText(html) {
+    const withBreaks = `${html || ""}`
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/p>/gi, "\n")
+      .replace(/<\/div>/gi, "\n");
+    const div = document.createElement("div");
+    div.innerHTML = withBreaks;
+    return div.textContent.replace(/\n{3,}/g, "\n\n").trim();
+  }
+
   function attachComposeTranslator(editorEl) {
     if (editorEl.hasAttribute(EDITOR_PROCESSED_ATTR)) return;
     editorEl.setAttribute(EDITOR_PROCESSED_ATTR, "1");
 
-    const panel = document.createElement("div");
-    panel.className = "mh-compose-translate";
+    const wrap = document.createElement("span");
+    wrap.className = "mh-compose-controls";
 
-    const toggle = document.createElement("button");
-    toggle.type = "button";
-    toggle.className = "mh-compose-toggle";
-    toggle.textContent = "✎ Write in my language & translate";
-
-    const body = document.createElement("div");
-    body.className = "mh-compose-body";
-    body.hidden = true;
-
-    const textarea = document.createElement("textarea");
-    textarea.className = "mh-compose-textarea";
-    textarea.placeholder = "Type your message in your own language here…";
-    textarea.rows = 3;
-
-    const controls = document.createElement("div");
-    controls.className = "mh-compose-controls";
-
-    const label = document.createElement("span");
-    label.textContent = "Translate to:";
-
-    const select = buildLangSelect(getSetting("composeTargetLang"));
-    select.addEventListener("change", () => {
-      setSetting("composeTargetLang", select.value);
-    });
-
-    const translateBtn = document.createElement("button");
-    translateBtn.type = "button";
-    translateBtn.className = "mh-compose-insert";
-    translateBtn.textContent = "Translate & insert";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "mh-translate-btn";
+    btn.textContent = "Translate my message";
 
     const status = document.createElement("span");
     status.className = "mh-compose-status";
 
-    controls.appendChild(label);
-    controls.appendChild(select);
-    controls.appendChild(translateBtn);
-    controls.appendChild(status);
+    wrap.appendChild(btn);
+    wrap.appendChild(status);
 
-    body.appendChild(textarea);
-    body.appendChild(controls);
-
-    panel.appendChild(toggle);
-    panel.appendChild(body);
-
-    toggle.addEventListener("click", () => {
-      body.hidden = !body.hidden;
-    });
-
-    translateBtn.addEventListener("click", async () => {
-      const text = textarea.value.trim();
+    btn.addEventListener("click", async () => {
+      const text = htmlToText(editorEl.html);
       if (!text) return;
 
-      status.textContent = BUSY_LABEL;
-      translateBtn.disabled = true;
+      const previousLabel = btn.textContent;
+      btn.textContent = BUSY_LABEL;
+      btn.disabled = true;
 
       try {
-        const result = await translate(text, select.value);
+        const target = getSetting("composeTargetLang");
+        const result = await translate(text, target);
         const htmlFragment = result.translated.split("\n").map(escapeHtml).join("<br>");
-        const current = `${editorEl.html || ""}`;
-        const separator = current.trim() ? "<br>" : "";
-        editorEl.html = current + separator + "<p>" + htmlFragment + "</p>";
+        editorEl.html = "<p>" + htmlFragment + "</p>";
 
         const providerLabels = { deepl: "DeepL", google: "Google", mymemory: "MyMemory", yandex: "Yandex" };
-        status.textContent = "Inserted (" + (providerLabels[result.provider] || result.provider) + ")";
-        textarea.value = "";
+        status.textContent = "Replaced (" + (providerLabels[result.provider] || result.provider) + ")";
+        setTimeout(() => { status.textContent = ""; }, 2500);
       } catch (err) {
         status.textContent = "Error: " + (err && err.message ? err.message : err);
       } finally {
-        translateBtn.disabled = false;
+        btn.textContent = previousLabel;
+        btn.disabled = false;
       }
     });
 
-    editorEl.insertAdjacentElement("beforebegin", panel);
+    editorEl.insertAdjacentElement("beforebegin", wrap);
   }
 
   // ---------------------------------------------------------------------
