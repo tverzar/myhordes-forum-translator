@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MyHordes Forum Translator
 // @namespace    https://myhordes.eu/
-// @version      1.0.3
+// @version      1.1.0
 // @description  Translate MyHordes forum posts between French, English, Russian and Spanish (Google Translate, MyMemory, DeepL or Yandex), and translate your own replies into the forum's language.
 // @author       you
 // @updateURL    https://raw.githubusercontent.com/tverzar/myhordes-forum-translator/master/tampermonkey/myhordes-forum-translator.user.js
@@ -193,13 +193,13 @@
     switch (provider) {
       case "deepl": {
         const key = getSetting("deeplApiKey");
-        if (!key) throw new Error("No DeepL API key set. Open the ⚙ settings panel and add one, or switch provider.");
+        if (!key) throw new Error("No DeepL API key set. Open the 🌐 settings panel and add one, or switch provider.");
         return translateDeepL(text, target, key);
       }
       case "yandex": {
         const key = getSetting("yandexApiKey");
         const folderId = getSetting("yandexFolderId");
-        if (!key || !folderId) throw new Error("Yandex Translate needs both an API key and a folder ID. Open the ⚙ settings panel, or switch provider.");
+        if (!key || !folderId) throw new Error("Yandex Translate needs both an API key and a folder ID. Open the 🌐 settings panel, or switch provider.");
         return translateYandex(text, target, key, folderId);
       }
       case "mymemory":
@@ -216,8 +216,15 @@
   const style = document.createElement("style");
   style.textContent = `
     .mh-translate-controls { display: block; clear: both; max-width: 100%; margin-top: 4px; }
-    .mh-translate-controls select.mh-translate-lang { font-size: 11px; padding: 0; margin: 0 2px 0 0; vertical-align: middle; }
-    .mh-translate-controls a.mh-translate-btn { cursor: pointer; }
+    .mh-translate-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 10px; border-radius: 10px;
+      background: rgba(106, 135, 89, 0.15); border: 1px solid #6a8759;
+      color: inherit; font-size: 0.85em; line-height: 1.6;
+      text-decoration: none; cursor: pointer;
+    }
+    .mh-translate-btn:hover { background: rgba(106, 135, 89, 0.3); }
+    .mh-translate-btn::before { content: "🌐"; font-size: 0.9em; }
 
     .mh-translation-block { margin-top: 6px; padding: 6px 8px; border-left: 3px solid #6a8759; background: rgba(106, 135, 89, 0.1); font-size: 0.95em; }
     .mh-translation-header { font-size: 0.8em; opacity: 0.7; margin-bottom: 4px; }
@@ -230,13 +237,14 @@
     .mh-compose-insert { cursor: pointer; }
     .mh-compose-status { font-size: 0.85em; opacity: 0.8; }
 
-    #mh-translate-gear {
+    #mh-translate-fab {
       position: fixed; right: 16px; bottom: 16px; z-index: 100000;
       width: 40px; height: 40px; border-radius: 50%; border: none;
-      background: #6a8759; color: #fff; font-size: 18px; cursor: pointer;
+      background: #6a8759; color: #fff; font-size: 20px; cursor: pointer;
       box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+      display: flex; align-items: center; justify-content: center; padding: 0;
     }
-    #mh-translate-gear:hover { background: #557046; }
+    #mh-translate-fab:hover { background: #557046; }
 
     #mh-translate-settings-overlay {
       position: fixed; inset: 0; z-index: 100001;
@@ -432,9 +440,9 @@
     }
 
     const gear = document.createElement("button");
-    gear.id = "mh-translate-gear";
+    gear.id = "mh-translate-fab";
     gear.type = "button";
-    gear.textContent = "⚙";
+    gear.textContent = "🌐";
     gear.title = "MyHordes Forum Translator settings";
     gear.addEventListener("click", () => {
       loadIntoForm();
@@ -465,20 +473,14 @@
     const wrap = document.createElement("span");
     wrap.className = "mh-translate-controls";
 
-    const select = buildLangSelect(getSetting("targetLang"));
-
     const link = document.createElement("a");
-    link.className = "action-button mh-translate-btn";
+    link.className = "mh-translate-btn";
     link.href = "#";
     link.textContent = TRANSLATE_LABEL;
 
-    wrap.appendChild(document.createTextNode("[ "));
-    wrap.appendChild(select);
-    wrap.appendChild(document.createTextNode(" "));
     wrap.appendChild(link);
-    wrap.appendChild(document.createTextNode(" ]"));
 
-    return { wrap, select, link };
+    return { wrap, link };
   }
 
   function insertControls(postEl) {
@@ -490,10 +492,10 @@
 
     postEl.setAttribute(PROCESSED_ATTR, "1");
 
-    const { wrap, select, link } = buildControls();
+    const { wrap, link } = buildControls();
     link.addEventListener("click", (event) => {
       event.preventDefault();
-      onTranslateClick(contentEl, select.value, link);
+      onTranslateClick(contentEl, link);
     });
 
     footer.insertAdjacentElement("afterend", wrap);
@@ -529,7 +531,8 @@
     contentEl.insertAdjacentElement("afterend", block);
   }
 
-  async function onTranslateClick(contentEl, target, link) {
+  async function onTranslateClick(contentEl, link) {
+    const target = getSetting("targetLang");
     const existing = findTranslationBlock(contentEl);
     if (existing) {
       const sameLang = existing.dataset.lang === target;
