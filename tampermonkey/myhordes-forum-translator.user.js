@@ -4,6 +4,8 @@
 // @version      1.0.1
 // @description  Translate MyHordes forum posts between French, English, Russian and Spanish (Google Translate, MyMemory, DeepL or Yandex), and translate your own replies into the forum's language.
 // @author       you
+// @updateURL    https://raw.githubusercontent.com/tverzar/myhordes-forum-translator/master/tampermonkey/myhordes-forum-translator.user.js
+// @downloadURL  https://raw.githubusercontent.com/tverzar/myhordes-forum-translator/master/tampermonkey/myhordes-forum-translator.user.js
 // @match        https://myhordes.eu/*
 // @match        https://*.myhordes.eu/*
 // @match        https://myhordes.de/*
