@@ -1,6 +1,6 @@
 # MyHordes Forum Translator (Firefox + Chrome)
 
-Translates forum posts on [myhordes.eu](https://myhordes.eu) between French, English,
+Translates forum posts on MyHordes (myhordes.eu, myhordes.de, myhordes.fr, myhordes.com — same app, different community domains) between French, English,
 Russian and Spanish (any direction), and helps you write a reply in your own
 language and translate it into the forum's language before posting.
 
@@ -51,7 +51,7 @@ into both packages before testing/reloading either browser's copy.
 1. Open Firefox and go to `about:debugging#/runtime/this-firefox`.
 2. Click **Load Temporary Add-on…**.
 3. Select `firefox/manifest.json`.
-4. The addon is now active on myhordes.eu until you restart Firefox (you'll
+4. The addon is now active on any myhordes.eu/.de/.fr/.com domain until you restart Firefox (you'll
    need to reload it then).
 
 For a permanent install, package with [web-ext](https://github.com/mozilla/web-ext)
@@ -65,7 +65,7 @@ submit it to addons.mozilla.org.
 1. Open `chrome://extensions`.
 2. Enable **Developer mode** (top right).
 3. Click **Load unpacked** and select the `chrome/` folder.
-4. The addon is now active on myhordes.eu.
+4. The addon is now active on any myhordes.eu/.de/.fr/.com domain.
 
 For the Chrome Web Store, zip the contents of `chrome/` and upload it via the
 [developer dashboard](https://chrome.google.com/webstore/devconsole) (a
